@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints
+
+# Flask
+instance/
+.webassets-cache
+
+# Uploads
+uploads/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+
+# Saved models (optionnel - décommenter si vous ne voulez pas versionner les modèles)
+# saved_models/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
