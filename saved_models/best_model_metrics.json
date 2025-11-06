@@ -1,0 +1,12 @@
+{
+    "model_name": "Modèle Mini-VGG",
+    "short_name": "vgg",
+    "test_accuracy": 0.9508950114250183,
+    "test_loss": 0.1536295861005783,
+    "train_accuracy": 0.9506480097770691,
+    "val_accuracy": 0.9537977576255798,
+    "train_loss": 0.16210706532001495,
+    "val_loss": 0.14949141442775726,
+    "epochs_trained": 3,
+    "timestamp": "2025-11-03 15:47:09"
+}
