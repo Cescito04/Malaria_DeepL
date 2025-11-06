@@ -142,16 +142,10 @@ def predict_image(image_path):
         logger.info(f"Image prétraitée, shape: {img_array.shape}")
         
         # Faire la prédiction avec optimisations mémoire
-        # Utiliser predict avec batch_size=1 pour économiser la mémoire
-        try:
-            prediction = model.predict(img_array, batch_size=1, verbose=0, use_multiprocessing=False)
-            logger.info(f"Prédiction effectuée: {prediction}")
-        except Exception as pred_error:
-            logger.error(f"Erreur lors de la prédiction: {pred_error}")
-            # Fallback: utiliser predict_on_batch
-            logger.info("Tentative avec predict_on_batch...")
-            prediction = model.predict_on_batch(img_array)
-            logger.info(f"Prédiction effectuée (fallback): {prediction}")
+        # Utiliser predict_on_batch qui est plus rapide et utilise moins de mémoire
+        logger.info("Début de la prédiction TensorFlow...")
+        prediction = model.predict_on_batch(img_array)
+        logger.info(f"Prédiction effectuée: {prediction}")
         
         # Le modèle retourne une probabilité (binaire: 0 = Uninfected, 1 = Parasitized)
         prob_parasitized = float(prediction[0][0])

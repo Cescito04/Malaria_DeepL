@@ -3,7 +3,7 @@ services:
     name: malaria-deepl
     env: python
     buildCommand: bash build.sh
-    startCommand: python -m gunicorn app:app --config gunicorn_config.py
+    startCommand: python -m gunicorn app:app --config gunicorn_config.py --timeout 300 --graceful-timeout 120
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
