@@ -6,7 +6,8 @@ import multiprocessing
 workers = 1  # Utiliser 1 worker pour économiser la mémoire (TensorFlow est gourmand)
 
 # Timeout augmenté pour les prédictions TensorFlow (peuvent prendre du temps)
-timeout = 120  # 2 minutes
+timeout = 300  # 5 minutes (pour les prédictions TensorFlow lourdes)
+graceful_timeout = 120  # 2 minutes pour terminer gracieusement
 
 # Bind
 bind = "0.0.0.0:{}".format(os.environ.get("PORT", 5001))

@@ -63,11 +63,27 @@ else:
 
 print(f"Chargement du modèle depuis: {MODEL_PATH}")
 try:
-    # Optimiser TensorFlow pour les prédictions
-    tf.config.threading.set_inter_op_parallelism_threads(2)
-    tf.config.threading.set_intra_op_parallelism_threads(2)
+    # Optimiser TensorFlow pour les prédictions et réduire la consommation mémoire
+    # Limiter les threads pour économiser la mémoire
+    tf.config.threading.set_inter_op_parallelism_threads(1)
+    tf.config.threading.set_intra_op_parallelism_threads(1)
     
+    # Désactiver le GPU (pas disponible sur Render de toute façon)
+    try:
+        tf.config.set_visible_devices([], 'GPU')
+    except:
+        pass  # Pas de GPU disponible, c'est normal
+    
+    # Désactiver les optimisations gourmandes en mémoire
+    os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'  # Désactiver OneDNN pour économiser la mémoire
+    
+    # Charger le modèle
+    logger.info("Chargement du modèle en cours...")
     model = tf.keras.models.load_model(MODEL_PATH)
+    
+    # Ne pas recompiler le modèle (il est déjà compilé et sauvegardé)
+    # Cela économise de la mémoire
+    
     print("✅ Modèle chargé avec succès!")
     logger.info(f"Modèle chargé: {MODEL_PATH}")
 except Exception as e:
@@ -125,10 +141,17 @@ def predict_image(image_path):
         img_array = preprocess_image(image_path)
         logger.info(f"Image prétraitée, shape: {img_array.shape}")
         
-        # Faire la prédiction avec timeout implicite
-        # Utiliser predict_on_batch pour être plus rapide
-        prediction = model.predict_on_batch(img_array)
-        logger.info(f"Prédiction effectuée: {prediction}")
+        # Faire la prédiction avec optimisations mémoire
+        # Utiliser predict avec batch_size=1 pour économiser la mémoire
+        try:
+            prediction = model.predict(img_array, batch_size=1, verbose=0, use_multiprocessing=False)
+            logger.info(f"Prédiction effectuée: {prediction}")
+        except Exception as pred_error:
+            logger.error(f"Erreur lors de la prédiction: {pred_error}")
+            # Fallback: utiliser predict_on_batch
+            logger.info("Tentative avec predict_on_batch...")
+            prediction = model.predict_on_batch(img_array)
+            logger.info(f"Prédiction effectuée (fallback): {prediction}")
         
         # Le modèle retourne une probabilité (binaire: 0 = Uninfected, 1 = Parasitized)
         prob_parasitized = float(prediction[0][0])
