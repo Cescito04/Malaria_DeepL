@@ -81,17 +81,17 @@ try:
     logger.info("Chargement du modèle en cours...")
     model = tf.keras.models.load_model(MODEL_PATH)
     
-    # Optimiser le modèle avec tf.function pour accélérer les prédictions
-    # Cela compile le modèle en un graphe optimisé
-    logger.info("Optimisation du modèle avec tf.function...")
-    @tf.function(reduce_retracing=True)
-    def optimized_predict(x):
-        return model(x, training=False)
+    # Warm-up: faire une prédiction factice pour initialiser le modèle
+    # Cela évite le délai de compilation lors de la première vraie prédiction
+    logger.info("Warm-up du modèle (prédiction factice)...")
+    try:
+        dummy_input = np.zeros((1, 100, 100, 3), dtype=np.float32)
+        _ = model(dummy_input, training=False)
+        logger.info("✅ Warm-up réussi!")
+    except Exception as e:
+        logger.warning(f"Warm-up échoué (non critique): {e}")
     
-    # Remplacer la méthode predict par la version optimisée
-    model.optimized_predict = optimized_predict
-    
-    print("✅ Modèle chargé et optimisé avec succès!")
+    print("✅ Modèle chargé avec succès!")
     logger.info(f"Modèle chargé: {MODEL_PATH}")
 except Exception as e:
     logger.error(f"Erreur lors du chargement du modèle: {e}")
@@ -149,7 +149,7 @@ def predict_image(image_path):
         logger.info(f"Image prétraitée, shape: {img_array.shape}")
         
         # Faire la prédiction avec optimisations mémoire
-        # Utiliser la version optimisée avec tf.function si disponible
+        # Utiliser __call__ directement (plus rapide et moins de mémoire)
         logger.info("Début de la prédiction TensorFlow...")
         
         # Convertir en tensor si nécessaire
@@ -158,17 +158,17 @@ def predict_image(image_path):
         else:
             img_tensor = img_array
         
-        # Utiliser la version optimisée si disponible, sinon __call__ directement
-        if hasattr(model, 'optimized_predict'):
-            logger.info("Utilisation de la version optimisée...")
-            prediction = model.optimized_predict(img_tensor)
-        else:
-            logger.info("Utilisation de __call__...")
-            prediction = model(img_tensor, training=False)
+        # Utiliser __call__ directement (plus rapide et moins de mémoire)
+        # Le warm-up au démarrage évite le délai de compilation
+        prediction = model(img_tensor, training=False)
         
         # Convertir en numpy si nécessaire
         if hasattr(prediction, 'numpy'):
             prediction = prediction.numpy()
+        elif isinstance(prediction, np.ndarray):
+            pass  # Déjà en numpy
+        else:
+            prediction = np.array(prediction)
         
         logger.info(f"Prédiction effectuée: {prediction}")
         
