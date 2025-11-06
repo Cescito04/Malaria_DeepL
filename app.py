@@ -81,10 +81,17 @@ try:
     logger.info("Chargement du modèle en cours...")
     model = tf.keras.models.load_model(MODEL_PATH)
     
-    # Ne pas recompiler le modèle (il est déjà compilé et sauvegardé)
-    # Cela économise de la mémoire
+    # Optimiser le modèle avec tf.function pour accélérer les prédictions
+    # Cela compile le modèle en un graphe optimisé
+    logger.info("Optimisation du modèle avec tf.function...")
+    @tf.function(reduce_retracing=True)
+    def optimized_predict(x):
+        return model(x, training=False)
     
-    print("✅ Modèle chargé avec succès!")
+    # Remplacer la méthode predict par la version optimisée
+    model.optimized_predict = optimized_predict
+    
+    print("✅ Modèle chargé et optimisé avec succès!")
     logger.info(f"Modèle chargé: {MODEL_PATH}")
 except Exception as e:
     logger.error(f"Erreur lors du chargement du modèle: {e}")
@@ -142,9 +149,27 @@ def predict_image(image_path):
         logger.info(f"Image prétraitée, shape: {img_array.shape}")
         
         # Faire la prédiction avec optimisations mémoire
-        # Utiliser predict_on_batch qui est plus rapide et utilise moins de mémoire
+        # Utiliser la version optimisée avec tf.function si disponible
         logger.info("Début de la prédiction TensorFlow...")
-        prediction = model.predict_on_batch(img_array)
+        
+        # Convertir en tensor si nécessaire
+        if not isinstance(img_array, tf.Tensor):
+            img_tensor = tf.convert_to_tensor(img_array, dtype=tf.float32)
+        else:
+            img_tensor = img_array
+        
+        # Utiliser la version optimisée si disponible, sinon __call__ directement
+        if hasattr(model, 'optimized_predict'):
+            logger.info("Utilisation de la version optimisée...")
+            prediction = model.optimized_predict(img_tensor)
+        else:
+            logger.info("Utilisation de __call__...")
+            prediction = model(img_tensor, training=False)
+        
+        # Convertir en numpy si nécessaire
+        if hasattr(prediction, 'numpy'):
+            prediction = prediction.numpy()
+        
         logger.info(f"Prédiction effectuée: {prediction}")
         
         # Le modèle retourne une probabilité (binaire: 0 = Uninfected, 1 = Parasitized)
