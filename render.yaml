@@ -3,7 +3,7 @@ services:
     name: malaria-deepl
     env: python
     buildCommand: bash build.sh
-    startCommand: python -m gunicorn app:app --bind 0.0.0.0:$PORT
+    startCommand: python -m gunicorn app:app --config gunicorn_config.py
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
