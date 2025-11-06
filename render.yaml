@@ -2,8 +2,8 @@ services:
   - type: web
     name: malaria-deepl
     env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: python -m gunicorn app:app
+    buildCommand: bash build.sh
+    startCommand: python3 -m gunicorn app:app --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
