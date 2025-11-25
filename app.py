@@ -17,6 +17,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from PIL import Image
 import tensorflow as tf
+from dotenv import load_dotenv
+
+# Charger les variables d'environnement depuis le fichier .env
+load_dotenv()
 
 # Configuration du logging
 logging.basicConfig(level=logging.INFO)
@@ -995,4 +999,5 @@ if __name__ == '__main__':
     print("\n Pour arrêter le serveur, appuyez sur Ctrl+C\n")
     
     app.run(debug=debug, host='0.0.0.0', port=port)
+
 
