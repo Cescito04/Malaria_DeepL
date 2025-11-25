@@ -44,3 +44,16 @@ Thumbs.db
 # Logs
 *.log
 
+# History
+history.json
+history_*.json
+
+# Users
+users.json
+reset_tokens.json
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if mode == 'login' %}Connexion{% elif mode == 'register' %}Inscription{% elif mode == 'forgot_password' %}Mot de passe oublié{% elif mode == 'reset_password' %}Réinitialiser le mot de passe{% endif %} - AI Malaria Detection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.15);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.2);
+            --shadow-xl: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .auth-container {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            box-shadow: var(--shadow-xl);
+            padding: 50px;
+            max-width: 450px;
+            width: 100%;
+            animation: slideUp 0.6s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .auth-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: floatIcon 3s ease-in-out infinite;
+        }
+
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .auth-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .auth-header p {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn-auth {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--gradient-1);
+            color: white;
+            margin-top: 10px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-auth:active {
+            transform: translateY(0);
+        }
+
+        .btn-auth:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid var(--danger);
+            color: var(--danger);
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 0.9rem;
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid var(--success);
+            color: var(--success);
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 0.9rem;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .auth-footer a:hover {
+            color: var(--primary-dark);
+        }
+
+        .auth-footer p {
+            margin: 8px 0;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-auth.loading .loading-spinner {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <div class="auth-icon">
+                {% if mode == 'login' %}🔐
+                {% elif mode == 'register' %}📝
+                {% elif mode == 'forgot_password' %}🔑
+                {% elif mode == 'reset_password' %}🔒
+                {% endif %}
+            </div>
+            <h1>
+                {% if mode == 'login' %}Connexion
+                {% elif mode == 'register' %}Inscription
+                {% elif mode == 'forgot_password' %}Mot de passe oublié
+                {% elif mode == 'reset_password' %}Réinitialiser le mot de passe
+                {% endif %}
+            </h1>
+            <p>
+                {% if mode == 'login' %}Connectez-vous pour accéder à l'application
+                {% elif mode == 'register' %}Créez votre compte pour commencer
+                {% elif mode == 'forgot_password' %}Entrez votre email pour recevoir un lien de réinitialisation
+                {% elif mode == 'reset_password' %}Entrez votre nouveau mot de passe
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="error-message" id="errorMessage" {% if error %}style="display: block;"{% endif %}>
+            {% if error %}{{ error }}{% endif %}
+        </div>
+        <div class="success-message" id="successMessage"></div>
+
+        <form id="authForm">
+            {% if mode == 'forgot_password' %}
+            <div class="form-group">
+                <label class="form-label" for="email">Email</label>
+                <input type="email" id="email" name="email" class="form-input" placeholder="votre@email.com" required>
+            </div>
+            <button type="submit" class="btn-auth" id="submitBtn">
+                <span class="loading-spinner"></span>
+                <span>Envoyer le lien de réinitialisation</span>
+            </button>
+            
+            {% elif mode == 'reset_password' %}
+            {% if token %}
+            <input type="hidden" id="token" value="{{ token }}">
+            <div class="form-group">
+                <label class="form-label" for="password">Nouveau mot de passe</label>
+                <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="confirm_password">Confirmer le mot de passe</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-input" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-auth" id="submitBtn">
+                <span class="loading-spinner"></span>
+                <span>Réinitialiser le mot de passe</span>
+            </button>
+            {% else %}
+            <div class="error-message" style="display: block;">
+                Token invalide ou expiré. Veuillez demander un nouveau lien.
+            </div>
+            <a href="/forgot-password" class="btn-auth" style="text-decoration: none; display: block; text-align: center;">
+                Demander un nouveau lien
+            </a>
+            {% endif %}
+            
+            {% else %}
+            {% if mode == 'register' %}
+            <div class="form-group">
+                <label class="form-label" for="email">Email</label>
+                <input type="email" id="email" name="email" class="form-input" placeholder="votre@email.com" required>
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label class="form-label" for="username">Nom d'utilisateur</label>
+                <input type="text" id="username" name="username" class="form-input" placeholder="nom_utilisateur" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Mot de passe</label>
+                <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn-auth" id="submitBtn">
+                <span class="loading-spinner"></span>
+                <span>{% if mode == 'login' %}Se connecter{% else %}S'inscrire{% endif %}</span>
+            </button>
+            {% endif %}
+        </form>
+
+        <div class="auth-footer">
+            {% if mode == 'login' %}
+            <p>Pas encore de compte ? <a href="/register">S'inscrire</a></p>
+            <p><a href="/forgot-password">Mot de passe oublié ?</a></p>
+            {% elif mode == 'register' %}
+            <p>Déjà un compte ? <a href="/login">Se connecter</a></p>
+            {% elif mode == 'forgot_password' %}
+            <p><a href="/login">Retour à la connexion</a></p>
+            {% elif mode == 'reset_password' %}
+            <p><a href="/login">Retour à la connexion</a></p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('authForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const mode = '{{ mode }}';
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Reset messages
+            hideMessages();
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.classList.add('loading');
+
+            try {
+                let url, data;
+
+                if (mode === 'forgot_password') {
+                    const email = document.getElementById('email').value.trim();
+                    if (!email) {
+                        showError('Veuillez entrer votre email');
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('loading');
+                        return;
+                    }
+                    url = '/forgot-password';
+                    data = { email };
+                } else if (mode === 'reset_password') {
+                    const tokenInput = document.getElementById('token');
+                    if (!tokenInput) {
+                        showError('Token invalide');
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('loading');
+                        return;
+                    }
+                    const token = tokenInput.value;
+                    const password = document.getElementById('password').value;
+                    const confirmPassword = document.getElementById('confirm_password').value;
+                    
+                    if (!password || !confirmPassword) {
+                        showError('Veuillez remplir tous les champs');
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('loading');
+                        return;
+                    }
+                    
+                    if (password !== confirmPassword) {
+                        showError('Les mots de passe ne correspondent pas');
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('loading');
+                        return;
+                    }
+                    
+                    url = `/reset-password/${token}`;
+                    data = { password, confirm_password: confirmPassword };
+                } else {
+                    const username = document.getElementById('username').value.trim();
+                    const password = document.getElementById('password').value;
+                    const email = mode === 'register' ? document.getElementById('email').value.trim() : '';
+
+                    // Validation
+                    if (!username || !password) {
+                        showError('Veuillez remplir tous les champs');
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('loading');
+                        return;
+                    }
+
+                    if (mode === 'register' && !email) {
+                        showError('Veuillez entrer votre email');
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('loading');
+                        return;
+                    }
+
+                    url = mode === 'login' ? '/login' : '/register';
+                    data = mode === 'login' 
+                        ? { username, password }
+                        : { username, email, password };
+                }
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                // Vérifier le statut de la réponse
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Erreur serveur' }));
+                    showError(errorData.error || `Erreur ${response.status}: ${response.statusText}`);
+                    return;
+                }
+
+                const result = await response.json();
+                console.log('Réponse serveur:', result);
+
+                if (result.success) {
+                    if (mode === 'forgot_password') {
+                        showSuccess('Si cet email existe, un lien de réinitialisation a été envoyé.');
+                    } else if (mode === 'reset_password') {
+                        showSuccess('Mot de passe réinitialisé avec succès !');
+                        setTimeout(() => {
+                            window.location.href = result.redirect || '/login';
+                        }, 2000);
+                    } else {
+                        showSuccess(mode === 'login' ? 'Connexion réussie !' : 'Compte créé avec succès !');
+                        const redirectUrl = result.redirect || '/';
+                        setTimeout(() => {
+                            window.location.href = redirectUrl;
+                        }, mode === 'register' ? 500 : 1000);
+                    }
+                } else {
+                    showError(result.error || 'Une erreur est survenue');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showError('Erreur de connexion. Veuillez réessayer.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('loading');
+            }
+        });
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        function hideMessages() {
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
